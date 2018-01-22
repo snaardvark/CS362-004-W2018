@@ -522,6 +522,7 @@ int getWinners(int players[MAX_PLAYERS], struct gameState *state) {
   return 0;
 }
 
+//draws 1 card, shuffling the discard pile 1st, if needed
 int drawCard(int player, struct gameState *state)
 {	int count;
   int deckCounter;
@@ -662,30 +663,13 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
     nextPlayer = 0;
   }
   
+  int result;   //return value from my refactored functions (drewsm)
 	
   //uses switch to select card and perform actions
   switch( card ) 
     {
-    case adventurer:
-      while(drawntreasure<2){
-	if (state->deckCount[currentPlayer] <1){//if the deck is empty we need to shuffle discard and add to deck
-	  shuffle(currentPlayer, state);
-	}
-	drawCard(currentPlayer, state);
-	cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer]-1];//top card of hand is most recently drawn card.
-	if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
-	  drawntreasure++;
-	else{
-	  temphand[z]=cardDrawn;
-	  state->handCount[currentPlayer]--; //this should just remove the top card (the most recently drawn one).
-	  z++;
-	}
-      }
-      while(z-1>=0){
-	state->discard[currentPlayer][state->discardCount[currentPlayer]++]=temphand[z-1]; // discard all cards in play that have been drawn
-	z=z-1;
-      }
-      return 0;
+    //Adventurer is one of the cards I chose in Assignment1
+     
 			
     case council_room:
       //+4 Cards
@@ -827,17 +811,12 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 
 
       return 0;
-		
+	
+    
+    //Smithy is one of the cards I chose in Assignment1
     case smithy:
-      //+3 Cards
-      for (i = 0; i < 3; i++)
-	{
-	  drawCard(currentPlayer, state);
-	}
-			
-      //discard card from hand
-      discardCard(handPos, currentPlayer, state, 0);
-      return 0;
+        result = smithyEffect(state, handPos, currentPlayer);
+        return result;
 		
     case village:
       //+1 Card
@@ -911,80 +890,17 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
       //discard card from hand
       discardCard(handPos, currentPlayer, state, 0);
       return 0;
-		
+
+    //Minion is one of the cards I chose in Assignment1
     case minion:
-      //+1 action
-      state->numActions++;
-			
-      //discard card from hand
-      discardCard(handPos, currentPlayer, state, 0);
-			
-      if (choice1)		//+2 coins
-	{
-	  state->coins = state->coins + 2;
-	}
-			
-      else if (choice2)		//discard hand, redraw 4, other players with 5+ cards discard hand and draw 4
-	{
-	  //discard hand
-	  while(numHandCards(state) > 0)
-	    {
-	      discardCard(handPos, currentPlayer, state, 0);
-	    }
-				
-	  //draw 4
-	  for (i = 0; i < 4; i++)
-	    {
-	      drawCard(currentPlayer, state);
-	    }
-				
-	  //other players discard hand and redraw if hand size > 4
-	  for (i = 0; i < state->numPlayers; i++)
-	    {
-	      if (i != currentPlayer)
-		{
-		  if ( state->handCount[i] > 4 )
-		    {
-		      //discard hand
-		      while( state->handCount[i] > 0 )
-			{
-			  discardCard(handPos, i, state, 0);
-			}
-							
-		      //draw 4
-		      for (j = 0; j < 4; j++)
-			{
-			  drawCard(i, state);
-			}
-		    }
-		}
-	    }
-				
-	}
-      return 0;
-		
+        result = minionEffect(choice1, choice2, state, handPos, currentPlayer);
+        return result;
+
+    //Steward is one of the cards I chose in Assignment1
     case steward:
-      if (choice1 == 1)
-	{
-	  //+2 cards
-	  drawCard(currentPlayer, state);
-	  drawCard(currentPlayer, state);
-	}
-      else if (choice1 == 2)
-	{
-	  //+2 coins
-	  state->coins = state->coins + 2;
-	}
-      else
-	{
-	  //trash 2 cards in hand
-	  discardCard(choice2, currentPlayer, state, 1);
-	  discardCard(choice3, currentPlayer, state, 1);
-	}
-			
-      //discard card from hand
-      discardCard(handPos, currentPlayer, state, 0);
-      return 0;
+        result = stewardEffect(choice1, choice2, choice3, state, handPos,
+                currentPlayer);
+        return result;
 		
     case tribute:
       if ((state->discardCount[nextPlayer] + state->deckCount[nextPlayer]) <= 1){
@@ -1137,23 +1053,10 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 
       return 0;
 
-		
-    case embargo: 
-      //+2 Coins
-      state->coins = state->coins + 2;
-			
-      //see if selected pile is in play
-      if ( state->supplyCount[choice1] == -1 )
-	{
-	  return -1;
-	}
-			
-      //add embargo token to selected supply pile
-      state->embargoTokens[choice1]++;
-			
-      //trash card
-      discardCard(handPos, currentPlayer, state, 1);		
-      return 0;
+    //Embargo is one of the cards I chose in Assignment1
+    case embargo:
+        result = embargoEffect(choice1, state, handPos, currentPlayer);
+        return result;
 		
     case outpost:
       //set outpost flag
@@ -1224,8 +1127,7 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 }
 
 int discardCard(int handPos, int currentPlayer, struct gameState *state, int trashFlag)
-{
-	
+{	
   //if card is not trashed, added to Played pile 
   if (trashFlag < 1)
     {
@@ -1238,7 +1140,8 @@ int discardCard(int handPos, int currentPlayer, struct gameState *state, int tra
   state->hand[currentPlayer][handPos] = -1;
 	
   //remove card from player's hand
-  if ( handPos == (state->handCount[currentPlayer] - 1) ) 	//last card in hand array is played
+  //last card in hand array is played
+  if ( handPos == (state->handCount[currentPlayer] - 1) )
     {
       //reduce number of cards in hand
       state->handCount[currentPlayer]--;
@@ -1328,6 +1231,222 @@ int updateCoins(int player, struct gameState *state, int bonus)
   return 0;
 }
 
+//My functions added in for Assignment 2
+
+/*******************************************************************************
+ * Function: adventurerEffect
+ * Description: Executes effects of playing the Adventurer card
+ * Parameters: struct gameState *state - tracks critical aspects of the game
+ *             int currentPlayer - specifies which player is current
+ *
+ * Pre-Conditions:  *state contains a valid game state
+ * Post-Conditions: currentPlayer deck has been shuffled, if needed.
+ *                  2 treasure cards from currentPlayer deck are added to the
+ *                      player hand.
+ *                  Other drawn cards are moved to player discard pile
+*******************************************************************************/
+int adventurerEffect(struct gameState *state, int currentPlayer) {
+    int drawntreasure=0;
+    int cardDrawn;
+    int temphand[MAX_HAND];
+    int z = 0;// this is the counter for the temp hand
+    while(drawntreasure<2){
+        //if the deck is empty we need to shuffle discard and add to deck
+        if (state->deckCount[currentPlayer] <1){
+          shuffle(currentPlayer, state);
+        }
+        drawCard(currentPlayer, state);
+        //top card of hand is most recently drawn card.
+        cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer]-1];
+        if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
+          drawntreasure++;
+        else{
+          temphand[z]=cardDrawn;
+          //this should just remove the top card (the most recently drawn one).
+          state->handCount[currentPlayer]--;
+          //BUG: commenting out the following line should mess up discarding
+          //z++;
+        }
+    }
+    while(z-1>=0){
+        // discard all cards in play that have been drawn
+        state->discard[currentPlayer][state->discardCount[currentPlayer]++]=temphand[z-1];
+        z=z-1;
+    }
+    return 0;
+}
+
+/*******************************************************************************
+ * Function: minionEffect
+ * Description: Executes effects of playing the Minion card
+ * Parameters:  int choice1 - indicates if player chose 1st card effect
+ *              int choice2 - indicates if player chose 2nd card effect
+ *              struct gameState *state - tracks critical aspects of the game
+ *              int currentPlayer - specifies which player is current
+ *
+ * Pre-Conditions:  *state contains a valid game state.
+ *                  Player has specified valid choices.
+ * Post-Conditions: Either Player has received +2 Coins, or
+ *                  Player hand is discarded and 4 new cards added,
+ *                  dependent on the values of choice1 and choice2
+*******************************************************************************/
+int minionEffect(int choice1, int choice2, struct gameState *state,
+        int handPos, int currentPlayer) {
+    int i, j;
+    //+1 action
+    state->numActions++;
+
+    //discard card from hand
+    discardCard(handPos, currentPlayer, state, 0);
+
+    if (choice1)		//+2 coins
+      {
+        state->coins = state->coins + 2;
+      }
+    // else, discard hand, redraw 4,
+    // other players with 5+ cards discard hand and draw 4
+    //BUG: changing 'else if' to just 'if' which could allow a player to select
+    //      both the first and second effects
+    //else if (choice2)
+    if (choice2)
+      {
+        //discard hand
+        while(numHandCards(state) > 0)
+          {
+            discardCard(handPos, currentPlayer, state, 0);
+          }
+
+        //draw 4
+        for (i = 0; i < 4; i++)
+          {
+            drawCard(currentPlayer, state);
+          }
+
+        //other players discard hand and redraw if hand size > 4
+        for (i = 0; i < state->numPlayers; i++)
+          {
+            if (i != currentPlayer)
+              {
+                if ( state->handCount[i] > 4 )
+                  {
+                    //discard hand
+                    while( state->handCount[i] > 0 )
+                      {
+                        discardCard(handPos, i, state, 0);
+                      }
+
+                    //draw 4
+                    for (j = 0; j < 4; j++)
+                      {
+                        drawCard(i, state);
+                      }
+                  }
+              }
+          }
+
+      }
+    return 0;
+}
+
+/*******************************************************************************
+ * Function: smithyEffect
+ * Description: Executes effects of playing the Smithy card
+ * Parameters:  struct gameState *state - tracks critical aspects of the game
+ *              int handPos - Position in Player hand of card being played
+ *              int currentPlayer - specifies which player is current
+ *
+ * Pre-Conditions:  *state contains a valid game state.
+ *                  Player has specified valid choices.
+ * Post-Conditions: 3 cards are added to Player hand from their deck, and
+ *                  the Smithy card is discarded from the hand
+*******************************************************************************/
+int smithyEffect(struct gameState *state, int handPos, int currentPlayer) {
+    int i;
+    
+    //+3 Cards
+    for (i = 0; i < 3; i++)
+      {
+        drawCard(currentPlayer, state);
+      }
+
+    //discard card from hand
+    //BUG: changing the parameter passed as trashFlag
+    //discardCard(handPos, currentPlayer, state, 0);
+    discardCard(handPos, currentPlayer, state, i);
+    return 0;
+}
+
+/*******************************************************************************
+ * Function: stewardEffect
+ * Description: Executes effects of playing the Steward card
+ * Parameters:  int choice1 - indicates if player chose 1st card effect
+ *              int choice2 - indicates if player chose 2nd card effect
+ *              int choice3 - indicates if player chose 3rd card effect
+ *              struct gameState *state - tracks critical aspects of the game
+ *              int handPos - Position in Player hand of card being played
+ *              int currentPlayer - specifies which player is current
+ *
+ * Pre-Conditions:  *state contains a valid game state.
+ *                  Player has specified valid choices.
+ * Post-Conditions: Either - 2 cards are added to Player hand, or
+ *                  Player receives +2 Coin, or
+ *                  2 cards from Player hand are trashed
+*******************************************************************************/
+int stewardEffect(int choice1, int choice2, int choice3,
+        struct gameState *state, int handPos, int currentPlayer) {
+    if (choice1 == 1) {
+        //+2 cards
+        drawCard(currentPlayer, state);
+        drawCard(currentPlayer, state);
+    }
+    else if (choice1 == 2) {
+        //+2 coins
+        state->coins = state->coins + 2;
+    }
+    else {
+        //trash 2 cards in hand
+        discardCard(choice2, currentPlayer, state, 1);
+        discardCard(choice3, currentPlayer, state, 1);
+    }
+
+    //discard card from hand
+    //BUG: removing the call to discardCard below
+    //discardCard(handPos, currentPlayer, state, 0);
+    return 0;
+}
+
+/*******************************************************************************
+ * Function: embargoEffect
+ * Description: Executes effects of playing the Embargo card
+ * Parameters:  int choice1 - indicates which Supply pile Player wants to embargo
+ *              struct gameState *state - tracks critical aspects of the game
+ *              int handPos - Position in Player hand of card being played
+ *              int currentPlayer - specifies which player is current
+ *
+ * Pre-Conditions:  *state contains a valid game state.
+ *                  Player has specified valid choices.
+ * Post-Conditions: Player receives +2 Coin,
+ *                  the Embargo card is trashed, and
+ *                  an Embargo token is added to the chosen Supply pile, if
+ *                      that Supply pile is in play
+*******************************************************************************/
+int embargoEffect(int choice1, struct gameState *state, int handPos,
+        int currentPlayer) {
+    //+2 Coins
+    state->coins = state->coins + 2;
+
+    //see if selected pile is in play
+    if ( state->supplyCount[choice1] == -1 )
+      {
+        return -1;
+      }
+
+    //add embargo token to selected supply pile
+    state->embargoTokens[choice1]++;
+
+    //trash card
+    discardCard(handPos, currentPlayer, state, 1);
+    return 0;
+}
 
 //end of dominion.c
-
