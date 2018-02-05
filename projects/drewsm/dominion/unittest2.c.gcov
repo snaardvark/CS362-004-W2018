@@ -1,0 +1,111 @@
+        -:    0:Source:unittest2.c
+        -:    0:Programs:3
+        -:    1:/*******************************************************************************
+        -:    2: * Author:                  Melvin Drews
+        -:    3: * Date Created:            2/3/2018
+        -:    4: * Last Modification Date:  2/4/2018
+        -:    5: * Overview: Unit test for the fullDeckCount function in dominion.c
+        -:    6: *
+        -:    7: * Input: None
+        -:    8: * Output: Prints to stdout the PASS/FAIL status for each test along with 
+        -:    9: *          a diagnostic hint
+        -:   10: * 
+        -:   11: *  Based on the testUpdateCoins.c code template provided as part of OSU CS362
+        -:   12: *  
+        -:   13: *  Build this test with:
+        -:   14: *      make test2
+        -:   15: ******************************************************************************/
+        -:   16:
+        -:   17:#include "dominion.h"
+        -:   18:#include "dominion_helpers.h"
+        -:   19:#include "unitTestCommon.h"
+        -:   20:#include <string.h>
+        -:   21:#include <stdio.h>
+        -:   22:
+        1:   23:int main() {
+        -:   24:    int handCards, deckCards, discardCards, player, card, expect, result;
+        1:   25:    int failCount = 0;
+        1:   26:    char* param1 = "hand count of card number";
+        1:   27:    char* param2 = "deck count of card number";
+        1:   28:    char* param3 = "discard count of card number";
+        1:   29:    char* param4 = "hand count";
+        1:   30:    char* param5 = "deck count";
+        1:   31:    char* param6 = "discard count";
+        -:   32:    char* param;
+        -:   33:    struct gameState G;
+        -:   34:
+        1:   35:    printf ("TESTING fullDeckCount():\n\n");
+        -:   36:    
+        -:   37:    //Run the test for each card type and for each of 2 players
+        3:   38:    for(player = 0; player < 2; player++) {
+        -:   39:        //Test for each possible card
+       56:   40:        for(card = curse; card <= treasure_map; card++) {
+       54:   41:            memset(&G, 23, sizeof(struct gameState));   // clear the game state
+       54:   42:            G.handCount[player] = 0;
+        -:   43:            //Add target card to the player's hand
+      378:   44:            for(handCards = 0; handCards < 6; handCards++) {
+        -:   45:                //Clear deckCards and discardCards before each run
+     2268:   46:                for(deckCards = 0; deckCards < 6; deckCards++) {
+     1944:   47:                    G.deck[player][deckCards] = -1;
+    13608:   48:                    for(discardCards = 0; discardCards < 6; discardCards++) {
+    11664:   49:                        G.discard[player][discardCards] = -1;
+        -:   50:                    }
+        -:   51:                }
+      324:   52:                deckCards = 0;
+      324:   53:                discardCards = 0;
+      324:   54:                G.deckCount[player] = 0;
+      324:   55:                G.discardCount[player] = 0;
+      324:   56:                expect = handCards + deckCards + discardCards;
+        -:   57:                //Test the constructed deck against fullDeckCount()
+      324:   58:                result = fullDeckCount(player, card, &G);
+      324:   59:                result = myCompare(expect, result);
+      324:   60:                if(result != 0) failCount++;
+      324:   61:                param = param1;
+      324:   62:                printResult(result, param, card);        
+        -:   63:                
+        -:   64:                //Add target card to the player's deck
+     2268:   65:                for(deckCards = 0; deckCards < 6; deckCards++) {
+        -:   66:                    //Clear discardCards before each run
+    13608:   67:                    for(discardCards = 0; discardCards < 6; discardCards++) {
+    11664:   68:                        G.discard[player][discardCards] = -1;
+        -:   69:                    }
+     1944:   70:                    G.discardCount[player] = 0;
+     1944:   71:                    discardCards = 0;
+        -:   72:                    
+     1944:   73:                    expect = handCards + deckCards + discardCards;
+        -:   74:                    //Test the constructed deck against fullDeckCount()
+     1944:   75:                    result = fullDeckCount(player, card, &G);
+     1944:   76:                    result = myCompare(expect, result);
+     1944:   77:                    if(result != 0) failCount++;
+     1944:   78:                    param = param2;
+     1944:   79:                    printResult(result, param, card);
+        -:   80:                    
+        -:   81:                    //Add target card to the player's discard pile
+    13608:   82:                    for(discardCards = 0; discardCards < 6; discardCards++) {
+    11664:   83:                        expect = handCards + deckCards + discardCards;
+        -:   84:                        //Test the constructed deck against fullDeckCount()
+    11664:   85:                        result = fullDeckCount(player, card, &G);
+    11664:   86:                        result = myCompare(expect, result);
+    11664:   87:                        if(result != 0) failCount++;
+    11664:   88:                        param = param3;
+    11664:   89:                        printResult(result, param, card);
+        -:   90:                        
+        -:   91:                        //Add the card to the player's discard pile
+    11664:   92:                        G.discard[player][discardCards] = card;
+    11664:   93:                        G.discardCount[player]++;
+        -:   94:                    }
+        -:   95:                    //Add the card to the player's deck
+     1944:   96:                    G.deck[player][deckCards] = card;
+     1944:   97:                    G.deckCount[player]++;
+        -:   98:                }
+        -:   99:                //Add the card to the player's hand
+      324:  100:                G.hand[player][handCards] = card;
+      324:  101:                G.handCount[player]++;
+        -:  102:            } 
+        -:  103:        }
+        -:  104:    }
+        -:  105:    
+        1:  106:    printSummary(failCount);
+        -:  107:
+        1:  108:    return 0;
+        -:  109:}

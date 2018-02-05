@@ -1,0 +1,56 @@
+        -:    0:Source:unittest3.c
+        -:    0:Programs:4
+        -:    1:/*******************************************************************************
+        -:    2: * Author:                  Melvin Drews
+        -:    3: * Date Created:            2/4/2018
+        -:    4: * Last Modification Date:  2/4/2018
+        -:    5: * Overview: Unit test for the numHandCards function in dominion.c
+        -:    6: *
+        -:    7: * Input: None
+        -:    8: * Output: Prints to stdout the PASS/FAIL status for each test along with 
+        -:    9: *          a diagnostic hint
+        -:   10: * 
+        -:   11: *  Based on the testUpdateCoins.c code template provided as part of OSU CS362
+        -:   12: *  
+        -:   13: *  Build this test with:
+        -:   14: *      make test3
+        -:   15: ******************************************************************************/
+        -:   16:
+        -:   17:#include "dominion.h"
+        -:   18:#include "dominion_helpers.h"
+        -:   19:#include "unitTestCommon.h"
+        -:   20:#include <string.h>
+        -:   21:#include <stdio.h>
+        -:   22:
+        1:   23:int main() {
+        -:   24:    int handCards, player, expect, result;
+        1:   25:    int failCount = 0;
+        1:   26:    char* param1 = "player";
+        -:   27:    char param2[23];
+        -:   28:    char* param;
+        1:   29:    param = param2;
+        -:   30:    struct gameState G;
+        1:   31:    memset(&G, 23, sizeof(struct gameState));   // clear the game state
+        -:   32:
+        1:   33:    printf ("TESTING numHandCards():\n\n");
+        -:   34:    
+        -:   35:    //Run the test for each player value possible in a valid game state
+        5:   36:    for(player = 0; player < MAX_PLAYERS; player++) {
+        4:   37:        G.whoseTurn = player;
+        -:   38:        //Run test for each possible handCount in a valid game state
+     2008:   39:        for(handCards = 0; handCards <= MAX_HAND; handCards++) {
+     2004:   40:            G.handCount[player] = handCards;
+     2004:   41:            memset(param2, 0, sizeof param2);
+     2004:   42:            sprintf(param2, "%s %i and handCount", param1, player);
+     2004:   43:            expect = handCards;
+     2004:   44:            result = numHandCards(&G);
+     2004:   45:            result = myCompare(expect, result);
+     2004:   46:            if(result != 0) failCount++;
+     2004:   47:            printResult(result, param, handCards);
+        -:   48:        }
+        -:   49:    }
+        -:   50:    
+        1:   51:    printSummary(failCount);
+        -:   52:
+        1:   53:    return 0;
+        -:   54:}

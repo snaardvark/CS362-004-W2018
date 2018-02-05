@@ -1,0 +1,108 @@
+        -:    0:Source:unittest1.c
+        -:    0:Programs:2
+        -:    1:/*******************************************************************************
+        -:    2: * Author:                  Melvin Drews
+        -:    3: * Date Created:            1/29/2018
+        -:    4: * Last Modification Date:  2/5/2018
+        -:    5: * Overview: Unit test for the isGameOver function in dominion.c
+        -:    6: *
+        -:    7: * Input: None
+        -:    8: * Output: Prints to stdout the PASS/FAIL status for each test along with 
+        -:    9: *          a diagnostic hint
+        -:   10: * 
+        -:   11: *  Based on the testUpdateCoins.c code template provided as part of OSU CS362
+        -:   12: *  
+        -:   13: *  Build this test with:
+        -:   14: *      make test1
+        -:   15: ******************************************************************************/
+        -:   16:
+        -:   17:#include "dominion.h"
+        -:   18:#include "dominion_helpers.h"
+        -:   19:#include "unitTestCommon.h"
+        -:   20:#include <string.h>
+        -:   21:#include <stdio.h>
+        -:   22:
+        1:   23:int main() {
+        -:   24:    int i, j, expect, result, emptyPiles, zeroPiles, currentPile;
+        1:   25:    int failCount = 0;
+        1:   26:    char* param1 = "province supplyCount";
+        1:   27:    char* param2 = "empty supply piles";
+        1:   28:    char* param3 = "last emptied supply pile";
+        -:   29:    char* param;
+        -:   30:    struct gameState G;
+        -:   31:
+        1:   32:    printf ("TESTING isGameOver():\n\n");
+        -:   33:    
+        -:   34:    //Test correct evaluation of province card supply empty
+        1:   35:    memset(&G, 23, sizeof(struct gameState));   // clear the game state
+        1:   36:    G.supplyCount[province] = 0;
+        1:   37:    expect = 1;     //Game should be over
+        1:   38:    param = param1;
+        -:   39:    do {
+        2:   40:        result = isGameOver(&G);
+        2:   41:        result = myCompare(expect, result);
+        2:   42:        if(result != 0) failCount++;
+        2:   43:        printResult(result, param, G.supplyCount[province]);
+        -:   44:                
+        2:   45:        ++G.supplyCount[province];
+        2:   46:        expect = 0;     //Game should not be over
+        2:   47:    } while(G.supplyCount[province] < 2);
+        -:   48:    //There are now some cards (at least 1) in the province pile
+        -:   49:    
+        -:   50:    //Test evaluation of 3 supply piles at 0 (excluding province)
+        1:   51:    param = param2;
+        1:   52:    emptyPiles = 4;     //The number of supply piles we want to empty
+        1:   53:    zeroPiles = 0;      //The number of supply piles we have emptied
+        1:   54:    currentPile = -1;    //Current supply pile being emptied
+        7:   55:    while(zeroPiles < emptyPiles) {
+        5:   56:        currentPile++;
+        5:   57:        if(currentPile == province) {   //Don't empty the province pile
+        1:   58:            continue;
+        -:   59:        }
+        4:   60:        G.supplyCount[currentPile] = 0;
+        4:   61:        zeroPiles++;
+        -:   62:    }
+        -:   63:    // zeroPiles should = emptyPiles
+        -:   64:    //Test isGameOver
+        1:   65:    expect = 1;     //Game should be over
+        1:   66:    result = isGameOver(&G);
+        1:   67:    result = myCompare(expect, result);
+        1:   68:    if(result != 0) failCount++;
+        1:   69:    printResult(result, param, zeroPiles);
+        -:   70:    
+        -:   71:    //Test effect of each supply pile being empty, varying # of empty piles
+        1:   72:    i = currentPile;    //Backward moving index
+        8:   73:    while((i >= 0) && (zeroPiles >= 0)) {
+        6:   74:        if(i == province) {
+        1:   75:            i--;
+        1:   76:            continue;     //province won't be empty
+        -:   77:        }
+        5:   78:        j = copper;  //Use as forward moving tracker
+        5:   79:        G.supplyCount[i] = 1;
+      120:   80:        while (j < treasure_map) {
+      110:   81:            G.supplyCount[j+1] = 0;
+      110:   82:            G.supplyCount[j] = 1;
+      110:   83:            if(zeroPiles > 2) {
+       44:   84:                expect = 1; //Game should be over
+        -:   85:            } else {
+       66:   86:                expect = 0; //Game should not be over
+        -:   87:            }
+      110:   88:        result = isGameOver(&G);
+      110:   89:        result = myCompare(expect, result);
+      110:   90:        printResult(result, param, zeroPiles);
+      110:   91:        if(result != 0) {
+        2:   92:            param = param3;
+        2:   93:            printResult(-1, param, j+1);
+        2:   94:            failCount++;
+        -:   95:        }
+      110:   96:        G.supplyCount[j+1] = 1;
+      110:   97:        j++;
+        -:   98:        }
+        5:   99:        if(i > 0) i--;
+        5:  100:        zeroPiles--;
+        -:  101:    }
+        -:  102:    
+        1:  103:    printSummary(failCount);
+        -:  104:
+        1:  105:    return 0;
+        -:  106:}

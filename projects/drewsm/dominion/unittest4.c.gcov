@@ -1,0 +1,101 @@
+        -:    0:Source:unittest4.c
+        -:    0:Programs:5
+        -:    1:/*******************************************************************************
+        -:    2: * Author:                  Melvin Drews
+        -:    3: * Date Created:            2/4/2018
+        -:    4: * Last Modification Date:  2/4/2018
+        -:    5: * Overview: Unit test for the updateCoins function in dominion.c
+        -:    6: *
+        -:    7: * Input: None
+        -:    8: * Output: Prints to stdout the PASS/FAIL status for each test along with 
+        -:    9: *          a diagnostic hint
+        -:   10: * 
+        -:   11: *  Based on the testUpdateCoins.c code template provided as part of OSU CS362
+        -:   12: *  
+        -:   13: *  Build this test with:
+        -:   14: *      make test4
+        -:   15: ******************************************************************************/
+        -:   16:
+        -:   17:#include "dominion.h"
+        -:   18:#include "dominion_helpers.h"
+        -:   19:#include "unitTestCommon.h"
+        -:   20:#include <string.h>
+        -:   21:#include <stdio.h>
+        -:   22:
+        1:   23:int main() {
+        -:   24:    int bonus, coins, expect, result;
+        1:   25:    int failCount = 0;
+        -:   26:    char param1[52];
+        -:   27:    char param2[22];
+        1:   28:    char* param3 = "copper,";
+        1:   29:    char* param4 = "copper, silver,";
+        1:   30:    char* param5 = "copper, silver, gold,";
+        -:   31:    char* param;
+        -:   32:    struct gameState G;
+        1:   33:    memset(&G, 23, sizeof(struct gameState));   // clear the game state
+        -:   34:    
+        1:   35:    printf ("TESTING updateCoins():\n\n");
+        1:   36:    G.handCount[0] = 10;    //Set the handCount for player0
+        -:   37:    
+        -:   38:    /**************************************************************************
+        -:   39:     * Testing with different values for coins simulates the effect of
+        -:   40:     * playing multiple action cards, where one action card may add some
+        -:   41:     * number of coins to see if this is accurately reflected when later
+        -:   42:     * action cards are played
+        -:   43:     **************************************************************************/
+        3:   44:    for(coins = 0; coins <= 1; coins++) {
+        6:   45:        for(bonus = 0; bonus <= 1; bonus++) {
+        4:   46:            G.coins = coins;    //Set the value in the game state
+        4:   47:            G.hand[0][1] = -1;  //Clear silver out of the player hand
+        4:   48:            G.hand[0][2] = -1;  //Clear gold out of the player hand
+        4:   49:            G.hand[0][0] = copper;  //Put 1 copper in player0's hand
+        4:   50:            expect = coins + bonus + 1;
+        -:   51:
+        -:   52:            //Run Test
+        4:   53:            result = updateCoins(0, &G, bonus);
+        4:   54:            result = G.coins;
+        4:   55:            result = myCompare(expect, result);
+        4:   56:            if(result != 0) failCount++;
+        4:   57:            memset(param1, 0, sizeof param1);
+        4:   58:            memset(param2, 0, sizeof param2);
+        4:   59:            sprintf(param2, "%s", param3);
+        4:   60:            sprintf(param1, "initial coins = %i, %s and bonus", coins, param2);
+        4:   61:            param = param1;
+        4:   62:            printResult(result, param, bonus);
+        -:   63:
+        4:   64:            G.hand[0][1] = silver;  //Put 1 silver in player0's hand
+        4:   65:            expect += 2;
+        -:   66:
+        -:   67:            //Run Test
+        4:   68:            result = updateCoins(0, &G, bonus);
+        4:   69:            result = G.coins;
+        4:   70:            result = myCompare(expect, result);
+        4:   71:            if(result != 0) failCount++;
+        4:   72:            memset(param1, 0, sizeof param1);
+        4:   73:            memset(param2, 0, sizeof param2);
+        4:   74:            sprintf(param2, "%s", param4);
+        4:   75:            sprintf(param1, "initial coins = %i, %s and bonus", coins, param2);
+        4:   76:            param = param1;
+        4:   77:            printResult(result, param, bonus);
+        -:   78:
+        4:   79:            G.hand[0][2] = gold;  //Put 1 gold in player0's hand
+        4:   80:            expect += 3;
+        -:   81:            
+        -:   82:            //Run Test
+        4:   83:            result = updateCoins(0, &G, bonus);
+        4:   84:            result = G.coins;
+        4:   85:            result = myCompare(expect, result);
+        4:   86:            if(result != 0) failCount++;
+        4:   87:            memset(param1, 0, sizeof param1);
+        4:   88:            memset(param2, 0, sizeof param2);
+        4:   89:            sprintf(param2, "%s", param5);
+        4:   90:            sprintf(param1, "initial coins = %i, %s and bonus", coins, param2);
+        4:   91:            param = param1;
+        4:   92:            printResult(result, param, bonus);
+        -:   93:        }
+        -:   94:    }
+        -:   95:
+        1:   96:    printSummary(failCount);
+        -:   97:
+        1:   98:    return 0;
+        -:   99:}
