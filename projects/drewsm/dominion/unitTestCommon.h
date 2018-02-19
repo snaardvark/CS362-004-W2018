@@ -32,16 +32,17 @@ extern "C" {
 //Specify the number of rounds for random tests
 #define ROUNDS 100
 
+#include "dominion.h"
+#include "dominion_helpers.h"
+#include <string.h>
+#include <stdio.h>
+
+//Global variable
+
+//function definitions
 int myCompare(int, int);
 void printResult(int, char*, int);
 void printSummary(int);
-
-//Global variable
-//char* cardNames[treasure_map + 1] = {"curse", "estate", "duchy", "province"
-//        , "copper", "silver", "gold", "adventurer", "council_room", "feast"
-//        , "gardens", "mine", "remodel", "smithy", "village", "baron"
-//        , "great_hall", "minion", "steward", "tribute", "ambassador", "cutpurse"
-//        , "embargo", "outpost", "salvager", "sea_hag", "treasure_map"};
 
 #endif /* UNITTESTCOMMON_H */
 
