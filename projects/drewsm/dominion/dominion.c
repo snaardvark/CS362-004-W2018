@@ -669,8 +669,10 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
   switch( card ) 
     {
     //Adventurer is one of the cards I chose in Assignment1
-      result = adventurerEffect(state, currentPlayer);
-      //The above line to call adventurerEffect appears to have been
+      case adventurer:
+        result = adventurerEffect(state, currentPlayer);
+        return result;
+      //The above lines to call adventurerEffect appears to have been
       //erroneously deleted in some prior commit. Adding back 2/18/2018
 			
     case council_room:
