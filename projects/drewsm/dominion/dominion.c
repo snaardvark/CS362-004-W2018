@@ -1251,24 +1251,51 @@ int updateCoins(int player, struct gameState *state, int bonus)
 *******************************************************************************/
 int adventurerEffect(struct gameState *state, int currentPlayer) {
     int drawntreasure=0;
-    int cardDrawn;
+    /* Introducing a bug fix here for the issue labeled Bug 3 in Assignment 5.
+     * Date: 3/4/2018
+     * Bug Description: Extra card removed from player hand in
+     *      adventurerEffect due to failure to identify empty deck
+     * Change Description: Added the following variables:
+     *      result - tracking the return value from drawCard function
+     *      draws - track how many cards have been drawn
+     *      maxDraws - equals the sum of deckCount & discardCount
+     * 
+     *      'result' is used in condition evaluation to prevent discarding
+     *      the hand top card if no new card was actually drawn.
+     *      Including this one new test led to an infinite loop in the while
+     *      condition, because drawntreasure never reached the exit value of 2.
+     *      'draws' and 'maxDraws' are therefore used to ensure we don't loop
+     *      more times than the number of cards available to draw.
+     */
+//    int cardDrawn;
+    int result, cardDrawn;
+    int draws = 0;
+    int maxDraws = state->deckCount[currentPlayer]
+        + state->discardCount[currentPlayer];
     int temphand[MAX_HAND];
     int z = 0;// this is the counter for the temp hand
-    while(drawntreasure<2){
+    while((drawntreasure<2) & (draws <= maxDraws)){
+//    while(drawntreasure<2) {
         //if the deck is empty we need to shuffle discard and add to deck
         if (state->deckCount[currentPlayer] <1){
           shuffle(currentPlayer, state);
         }
-        drawCard(currentPlayer, state);
+        result = drawCard(currentPlayer, state);
+//        drawCard(currentPlayer, state);
+        draws++;
         //top card of hand is most recently drawn card.
         cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer]-1];
-        if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
+        if ((cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
+            & (result == 0))
+//        if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
           drawntreasure++;
-        else{
+        else if(result == 0) {
+//        else {
           temphand[z]=cardDrawn;
           //this should just remove the top card (the most recently drawn one).
           state->handCount[currentPlayer]--;
-          //BUG: commenting out the following line should mess up discarding
+          //INTRODUCED BUG: commenting out the following line should mess up
+          //    discarding
           //z++;
         }
     }
