@@ -21,10 +21,7 @@ int main() {
     int smithyCards1, smithyCards2;
     int currentPlayer;
     int failures = 0;
-    
-    //Tracking for current values
-    
-        
+            
     //Test result explanation strings
     char *param0 = "smithy card";
     char *param1 = "pre-test handCount";
