@@ -14,11 +14,12 @@
  ******************************************************************************/
 
 #include "unitTestCommon.h"
+#include "randTestCommon.h"
 
 int main() {
     int result, i, discardSize, deckSize;
     //int handSize, found, val, undecked;
-    int handSize, val, undecked;
+    int handSize, val1, undecked;
     int currentPlayer;
     int failures = 0;
     
@@ -100,16 +101,17 @@ int main() {
     memset(param99, 0, sizeof param99);
     //Condition1 true?
     //Test if handCount increased by exactly the right number
-    val = 2;
-    result = myCompare((handSize + val), game->handCount[currentPlayer]);
+    val1 = 2;
+    result = myCompare((handSize + val1), game->handCount[currentPlayer]);
     sprintf(param99, "%s", param2);
-    printResult(result, param, deckTreasure);
     if(result) {
-        printf("We shouldn't get here\n");
+        printResult(1, param, deckTreasure);
         failures++;
         memset(param99, 0, sizeof param99);
         sprintf(param99, "%s", param3);
-        printResult(2, param, (handSize + val));
+        printResult(-1, param, (handSize + val1));
+    } else {
+        printResult(0, param, deckTreasure);
     }
 
     //Condition2 true?
@@ -117,12 +119,14 @@ int main() {
     memset(param99, 0, sizeof param99);
     result = myCompare(game->hand[currentPlayer][handSize], copper);
     sprintf(param99, "%s", param4);
-    printResult(result, param, copper);
     if(result) {
+        printResult(1, param, copper);
         failures++;
         memset(param99, 0, sizeof param99);
         sprintf(param99, "%s", param1);
-        printResult(2, param, deckTreasure);
+        printResult(-1, param, deckTreasure);
+    } else {
+        printResult(0, param, copper);
     }
     
 
@@ -132,33 +136,42 @@ int main() {
     result = myCompare(game->deckCount[currentPlayer], t2DeckPos);
     sprintf(param99, "%s", param6);
     undecked = deckSize - t2DeckPos;
-    printResult(result, param, undecked);
     if(result) {
+        printResult(1, param, undecked);
         failures++;
         memset(param99, 0, sizeof param99);
         sprintf(param99, "%s", param9);
-        printResult(2, param, (deckSize - undecked));
+        printResult(-1, param, (deckSize - undecked));
+    } else {
+        printResult(0, param, undecked);
     }
 
     //Condition 4 true?
-    val = 2;        //Number of treasure cards pulled in the hand
+    //Number of treasure cards pulled in the hand
+    val1 = game->handCount[currentPlayer] - handSize;
     //Calculate number of deck cards discarded
     if(deckTreasure <= 2) {
         undecked = deckSize;
     } else {
-        undecked = deckSize - t2DeckPos;    //Number of cards pulled from deck
+        //Number of cards that should've been pulled from deck
+        undecked = deckSize - game->deckCount[currentPlayer];
     }
-    val = undecked - val;   //number that should've been added to discard
+    if(myCompare(discardSize, game->discardCount[currentPlayer])) {
+        undecked += (game->discardCount[currentPlayer] - discardSize);
+    }
+    
     memset(param99, 0, sizeof param99);
     result = myCompare((discardSize + undecked)
             ,game->discardCount[currentPlayer]);
     sprintf(param99, "%s", param7);
-    printResult(result, param, undecked);
     if(result) {
+        printResult(1, param, undecked);
         failures++;
         memset(param99, 0, sizeof param99);
         sprintf(param99, "%s", param8);
-        printResult(-1, param, (discardSize + val));
+        printResult(-1, param, game->discardCount[currentPlayer]);
+    } else {
+        printResult(0, param, undecked);
     }
     printSummary(failures);
     return 0;

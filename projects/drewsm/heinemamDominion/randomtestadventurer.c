@@ -165,7 +165,8 @@ int main() {
         discardSize = game->discardCount[currentPlayer];
 
         //run the card effect function
-        adventurerEffect(game, currentPlayer);
+        result = cardEffect(adventurer, 0, 0, 0, game, 0, 0);
+        //adventurerEffect(game, currentPlayer);
 
         /*Test Conditions:
          * Condition1: currentPlayer handCount should have increased by 2

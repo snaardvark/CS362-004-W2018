@@ -109,7 +109,8 @@ int main() {
             game->embargoTokens[choice] = eTokens;
         }
         
-        result = embargoEffect(choice, game, handPos, currentPlayer);
+        result = cardEffect(embargo, choice, 0, 0, game, handPos, 0);
+        //result = embargoEffect(choice, game, handPos, currentPlayer);
         
         /* Test conditions:
          * Condition 1: Player received two coins

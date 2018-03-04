@@ -91,7 +91,7 @@ randomtestcard1: randTestCommon.o dominion.o rngs.o interface.o
 randomtestcard2: randTestCommon.o dominion.o rngs.o interface.o
 	gcc -o randomtestcard2 -g randomtestcard2.c randTestCommon.h -g randTestCommon.o dominion.o rngs.o interface.o $(CFLAGS)
 	
-randomtestall: randomtestadventurer randomtestcard1 randomtestcard2
+randomtestsall: randomtestadventurer randomtestcard1 randomtestcard2
 	./randomtestadventurer &> randomtestadventurer.out
 	gcov -bf randomtestadventurer dominion >> randomtestadventurer.out
 	cat randomtestadventurer.c.gcov >> randomtestadventurer.out

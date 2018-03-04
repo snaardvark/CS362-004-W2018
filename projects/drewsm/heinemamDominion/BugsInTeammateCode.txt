@@ -1,0 +1,51 @@
+Assignment 5 Requirement 3:
+BUG-REPORTS:
+Bugs found in teammate code
+Bug 1 description: Extra card draw for currentPlayer in smithyCard() function
+
+The effect of the smithy card is refactored from the original class repository, 
+moving the code into a new function smithyCard(). I ran my original build target 
+“unittestsall” to execute unit tests. The output for tests of the smithy card, 
+tested by cardtest1, were unexpected. For comparison, I ran the same cardtest1 
+unit test against my own version of dominion.c, which verified at least one of 
+the differences is the test I defined for Condition 1, “3 additional cards are 
+added to currentPlayer hand.”
+
+To identify the bug, I first tried reading through the heinemam smithyCard 
+function, but did not see any error. I then ran cardtest1 in gdb with 
+breakpoints set just before and after the call to the cardEffect function. This 
+helped me verify the handCount for currentPlayer was incorrect after returning 
+from the call to cardEffect. Where 3 cards were expected to be added to 
+currentPlayer hand, instead 4 cards had been added. I re-ran cardTest1, this 
+time stepping through execution after the first breakpoint. As execution moved 
+through the for loop which calls drawCard, I was able to see this was happening 
+4 times instead of 3. The cause was then apparent, that the developer had 
+changed the for loop condition on line 1176. Where it should be:
+
+    for (i = 0; i < 3; i++)
+
+It has been changed to:
+
+    for (i = 0; i <= 3; i++)
+
+
+Bug 2 description: Extra treasure card drawn for currentPlayer in 
+adventurerCard() function
+
+The effect of the adventurer card is refactored from the original class 
+repository, moving the code into a new function adventurerCard(). I ran my 
+original build target “unittestsall” to execute unit tests. The output for tests 
+of the adventurer card, tested by cardtest2, were unexpected. For comparison, I 
+ran the same cardtest2 unit test against my own version of dominion.c, which 
+verified at least one of the differences is the test I defined for Condition 1, 
+“currentPlayer handCount should have increased by 2.”
+
+A quick visual inspection of the adventurerCard() code reveals the likely cause 
+to be a modification to the condition for the while loop testing the value for 
+drawntreasure. Line 1151 should read:
+
+    while(drawntreasure<2)
+
+Instead, this line reads:
+
+    while(drawntreasure<=2)

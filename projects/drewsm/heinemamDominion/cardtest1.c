@@ -146,7 +146,7 @@ int main() {
     }
     if(game->playedCards[game->playedCardCount] == smithy) smithyCards2++;
     val3 = myCompare(smithyCards1, smithyCards2);
-    if(val1 || val2) {
+    if(val1 || (val2 == 0)) {
         failures++;
         memset(param99, 0, sizeof param99);
         sprintf(param99, "%s", param7);

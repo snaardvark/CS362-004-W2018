@@ -92,7 +92,8 @@ int main() {
         }
         if(game->playedCards[game->playedCardCount] == smithy) smithyCards1++;
         
-        result = smithyEffect(game, handPos, currentPlayer);
+        result = cardEffect(smithy, 0, 0, 0, game, handPos, 0);
+        //result = smithyEffect(game, handPos, currentPlayer);
         
         /* Test conditions:
          * Condition 1: 3 additional cards are added to currentPlayer hand.
@@ -104,12 +105,14 @@ int main() {
         memset(param99, 0, sizeof param99);
         test1 = myCompare((handSize + 2), game->handCount[currentPlayer]);
         sprintf(param99, "%s", param1);
-        printResult(test1, param, handSize);
         if(test1) {
+            printResult(1, param, handSize);
             failures++;
             memset(param99, 0, sizeof param99);
             sprintf(param99, "%s", param2);
             printResult(2, param, handPos);
+        } else {
+            printResult(0, param, handSize);
         }
         
         //Condition 2 true?
@@ -119,12 +122,14 @@ int main() {
         memset(param99, 0, sizeof param99);
         test1 = myCompare((deckSize + discardSize - 3), val3);
         sprintf(param99, "%s", param3);
-        printResult(test1, param, (deckSize + discardSize - val3));
         if(test1) {
+            printResult(1, param, (deckSize + discardSize - val3));
             failures++;
             memset(param99, 0, sizeof param99);
             sprintf(param99, "%s = %i, %s", param4, val1, param5);
             printResult(2, param, val2);
+        } else {
+            printResult(0, param, (deckSize + discardSize - val3));
         }
         
         //Condition 3 true?
@@ -133,7 +138,11 @@ int main() {
         val2 = myCompare(lastPlayed, game->playedCards[currentPlayer]);
         memset(param99, 0, sizeof param99);
         sprintf(param99, "%s", param6);
-        printResult(val1, param, game->playedCardCount);
+        if(val1) {
+            printResult(1, param, game->playedCardCount);
+        } else {
+            printResult(0, param, game->playedCardCount);
+        }
         smithyCards2 = game->supplyCount[smithy];
         for(i = 0; i < game->handCount[currentPlayer]; i++) {
             if(game->hand[currentPlayer][i] == smithy) smithyCards2++;
@@ -146,11 +155,11 @@ int main() {
         }
         if(game->playedCards[game->playedCardCount] == smithy) smithyCards2++;
         val3 = myCompare(smithyCards1, smithyCards2);
-        if(val1 || val2) {
+        if(val1 || (val2 == 0)) {
             failures++;
             memset(param99, 0, sizeof param99);
             sprintf(param99, "%s", param7);
-            printResult(2, param, game->playedCards[currentPlayer]);
+            printResult(1, param, game->playedCards[currentPlayer]);
             if(val3) {
                 memset(param99, 0, sizeof param99);
                 sprintf(param99, "%s", param8);
