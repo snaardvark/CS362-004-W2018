@@ -1251,6 +1251,22 @@ int updateCoins(int player, struct gameState *state, int bonus)
 *******************************************************************************/
 int adventurerEffect(struct gameState *state, int currentPlayer) {
     int drawntreasure=0;
+    /* Introducing a bug fix here for the issue labeled Bug 3 in Assignment 5.
+     * Date: 3/4/2018
+     * Bug Description: Extra card removed from player hand in
+     *      adventurerEffect due to failure to identify empty deck
+     * Change Description: Added the following variables:
+     *      result - tracking the return value from drawCard function
+     *      draws - track how many cards have been drawn
+     *      maxDraws - equals the sum of deckCount & discardCount
+     * 
+     *      'result' is used in condition evaluation to prevent discarding
+     *      the hand top card if no new card was actually drawn.
+     *      Including this one new test led to an infinite loop in the while
+     *      condition, because drawntreasure never reached the exit value of 2.
+     *      'draws' and 'maxDraws' are therefore used to ensure we don't loop
+     *      more times than the number of cards available to draw.
+     */
 //    int cardDrawn;
     int result, cardDrawn;
     int draws = 0;
@@ -1278,7 +1294,8 @@ int adventurerEffect(struct gameState *state, int currentPlayer) {
           temphand[z]=cardDrawn;
           //this should just remove the top card (the most recently drawn one).
           state->handCount[currentPlayer]--;
-          //BUG: commenting out the following line should mess up discarding
+          //INTRODUCED BUG: commenting out the following line should mess up
+          //    discarding
           //z++;
         }
     }
