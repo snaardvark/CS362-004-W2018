@@ -1,6 +1,7 @@
 
 
 import junit.framework.TestCase;
+import java.io.*;
 
 //You can use this as a skeleton for your 3 different test approach
 //It is an optional to use this file, you can generate your own test file(s) to test the target function!
@@ -19,11 +20,20 @@ public class UrlValidatorTest extends TestCase {
 
    
    
-   public void testManualTest()
+   public void testManualTest() throws IOException
    {
-//You can use this function to implement your manual testing	   
+	   //You can use this function to implement your manual testing
+	   //Code suggested by "Java A Beginner's Guid, 6th Edition" by Schildt, Herbert, 2014
+	   BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
+	   String url;
+	   System.out.println("Enter URLs for testing, one per line. Type 'stop' on a line by itself to quit");
+	   do {
+		   url = br.readLine();
+		   System.out.println(urlVal.isValid(url));
+	      } while(!url.equals("stop"));
+	   }
 	   
-   }
    
    
    public void testYourFirstPartition()
@@ -44,6 +54,11 @@ public class UrlValidatorTest extends TestCase {
 
    }
    
-
+   
+   public static void main(String args[]) throws IOException
+   {
+	   UrlValidatorTest fct = new UrlValidatorTest("url test");
+	   fct.testManualTest();
+   }
 
 }
