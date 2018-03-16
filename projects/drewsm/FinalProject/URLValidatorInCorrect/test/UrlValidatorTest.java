@@ -1,5 +1,4 @@
 
-
 import junit.framework.TestCase;
 import java.io.*;
 
@@ -30,7 +29,14 @@ public class UrlValidatorTest extends TestCase {
 	   System.out.println("Enter URLs for testing, one per line. Type 'stop' on a line by itself to quit");
 	   do {
 		   url = br.readLine();
-		   System.out.println(urlVal.isValid(url));
+		   try {
+			   System.out.println(urlVal.isValid(url));
+		   //} catch (java.lang.NullPointerException npe) {
+			 //  System.out.println(npe.getMessage());
+		   } catch (Throwable t) {
+			   //System.out.println("crash!");
+			   t.printStackTrace();
+		   }
 	      } while(!url.equals("stop"));
 	   }
 	   
